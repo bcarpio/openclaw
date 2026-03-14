@@ -187,6 +187,27 @@ Key things to replace:
 
 The `gateway.controlUi.allowedOrigins` must be set manually — `docker-setup.sh` fails to set it due to the gateway crash-loop during onboard.
 
+## Control UI pairing
+
+After updating `openclaw.json`, restart the gateway and open the dashboard:
+
+```bash
+docker compose restart openclaw-gateway
+docker compose run --rm openclaw-cli dashboard --no-open
+```
+
+Copy the URL it prints and open it in your browser. You'll see "pairing required". To approve:
+
+```bash
+# List pending device requests
+docker compose exec openclaw-gateway node dist/index.js devices list
+
+# Approve your browser using the requestId from the list
+docker compose exec openclaw-gateway node dist/index.js devices approve <requestId>
+```
+
+Refresh the browser and you're in.
+
 ## Post-setup skill install
 
 The gateway crash-loops during onboard (before `allowedOrigins` is set), so skill installs may fail during the wizard. Skip them and install after setup completes:
