@@ -58,6 +58,14 @@ Always use `--force-recreate`, not `restart`, when compose file changes:
 docker compose up -d --force-recreate openclaw-gateway
 ```
 
+### 4. Set compaction model to Haiku
+
+OpenClaw summarizes old conversation history when sessions get long. By default it uses the primary model. Force it to use Haiku so compaction doesn't burn Sonnet tokens:
+
+```bash
+docker compose run --rm openclaw-cli config set agents.defaults.compaction.model "litellm/claude-haiku"
+```
+
 ## Configure `openclaw.json`
 
 After setup, edit `~/.openclaw/openclaw.json`. The example below routes through LiteLLM (AWS Bedrock), uses Haiku as the default model, and includes Telegram.
