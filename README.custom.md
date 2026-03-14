@@ -42,6 +42,58 @@ export OPENCLAW_HOME_VOLUME=openclaw-home
 ./docker-setup.sh
 ```
 
+## LiteLLM configuration
+
+If you're running LiteLLM as a proxy (e.g. for AWS Bedrock), update `~/.openclaw/openclaw.json` after setup to point OpenClaw at your LiteLLM instance. Use `host.docker.internal` to reach the host from inside the container:
+
+```json
+{
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "litellm": {
+        "baseUrl": "http://host.docker.internal:4000",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "claude-sonnet",
+            "name": "Claude Sonnet 4.6",
+            "api": "openai-completions",
+            "input": ["text", "image"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          },
+          {
+            "id": "claude-haiku",
+            "name": "Claude Haiku 4.5",
+            "api": "openai-completions",
+            "input": ["text", "image"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "litellm/claude-sonnet"
+      },
+      "models": {
+        "litellm/claude-sonnet": {},
+        "litellm/claude-haiku": {}
+      },
+      "workspace": "/home/node/.openclaw/workspace"
+    }
+  }
+}
+```
+
+Merge this into your existing `~/.openclaw/openclaw.json` — don't replace the whole file, as setup writes gateway tokens and other config there.
+
 ## Post-setup skill install
 
 The gateway crash-loops during onboard (before `allowedOrigins` is set), so skill installs may fail during the wizard. Skip them and install after setup completes:
