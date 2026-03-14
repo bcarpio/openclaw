@@ -32,12 +32,12 @@ Extends `openclaw:local` with:
 # 1. Build the base image first
 docker build -t openclaw:local -f Dockerfile .
 
-# 2. Build the custom layer on top
-docker build -t openclaw:custom -f Dockerfile.local .
+# 2. Build the custom layer on top, tagged as openclaw:local
+# docker-setup.sh only skips pulling when the image is named "openclaw:local"
+docker build -t openclaw:local -f Dockerfile.local .
 
-# 3. Run setup with the custom image
+# 3. Run setup
 export OPENCLAW_DOCKER_APT_PACKAGES=gh
-export OPENCLAW_IMAGE=openclaw:custom
 export OPENCLAW_HOME_VOLUME=openclaw-home
 ./docker-setup.sh
 ```
