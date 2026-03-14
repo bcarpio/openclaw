@@ -18,10 +18,13 @@ dns:
   - 1.1.1.1
 ```
 
+Also mounts `~/.claude` into the gateway container so the `coding-agent` skill can dispatch to Claude Code CLI with your existing credentials. Override with `CLAUDE_CONFIG_DIR` if your config lives elsewhere.
+
 ### `Dockerfile.local`
 
 Extends `openclaw:local` with:
 
+- **Claude Code CLI** (`@anthropic-ai/claude-code`) for the `coding-agent` skill
 - **Homebrew (Linuxbrew)** so brew-only skills install without manual workarounds
 - **Go 1.24** from the official tarball (Debian apt ships 1.19 which is too old for most Go-based skills)
 - **User-writable npm global prefix** so `npm install -g` works as the non-root `node` user
