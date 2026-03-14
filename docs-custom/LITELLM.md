@@ -160,15 +160,52 @@ Notes:
 - `cost` is set to `0` because billing is handled by AWS Bedrock, not per-token through LiteLLM.
 - Default model is `claude-haiku` to minimize token costs. Switch to `claude-sonnet` for complex tasks.
 
-## Spend limits (optional)
+## Virtual keys and spend limits (important)
 
-LiteLLM supports budget and rate limiting via its admin UI at `http://localhost:4000/ui` (authenticate with your `LITELLM_MASTER_KEY`). You can set:
+**Never give OpenClaw the master key.** The master key (`LITELLM_MASTER_KEY`) bypasses all budget and rate limit checks. There is no built-in way to disable this — it's by design. If OpenClaw uses the master key, spend tracking won't work and budget caps are ignored.
 
-- Per-key daily/monthly spend caps
-- Per-model rate limits (requests/min, tokens/min)
-- Per-user budgets
+### Setup
 
-This is your safety net against runaway agent costs — even if OpenClaw goes wild, LiteLLM will cut it off at your limit.
+1. Start LiteLLM and log into the admin UI at `http://localhost:4000/ui` with your master key
+2. Go to **Virtual Keys** and create a new key:
+   - Key alias: `openclaw` (or whatever you want)
+   - Set a **Max Budget** (e.g. $5/day)
+   - Optionally set rate limits (requests/min, tokens/min)
+3. Copy the generated `sk-...` key
+4. During OpenClaw onboarding, when it asks for the LiteLLM API key, use this virtual key — **not** the master key
+
+### Where OpenClaw stores the key
+
+The API key is stored in two places inside the container (persisted via the `openclaw-home` volume):
+
+```
+~/.openclaw/agents/main/agent/auth-profiles.json  →  "key": "sk-your-virtual-key"
+~/.openclaw/agents/main/agent/models.json          →  "apiKey": "sk-your-virtual-key"
+```
+
+If you accidentally used the master key during onboarding, update both files with your virtual key and restart the gateway.
+
+### Gotcha: master key bypasses budgets
+
+If you see untracked spend in the LiteLLM UI from an unknown key, it's likely the master key being used. The master key:
+- Bypasses all budget limits
+- Bypasses all rate limits
+- Does not appear as a named key in the usage dashboard
+- Cannot be budget-restricted (setting its budget to $0 does not work)
+
+The only fix is to ensure OpenClaw is using a virtual key, not the master key.
+
+### Admin UI
+
+LiteLLM's admin UI at `http://localhost:4000/ui` lets you:
+
+- Track per-key spend in real time
+- Set daily/monthly budget caps per virtual key
+- Set per-model rate limits (requests/min, tokens/min)
+- View request logs with model, tokens, and cost per call
+- Create per-user or per-team budgets
+
+This is your safety net against runaway agent costs — even if OpenClaw goes wild, LiteLLM will cut it off at your virtual key's budget limit.
 
 ## Why LiteLLM instead of direct Bedrock?
 
