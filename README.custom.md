@@ -35,6 +35,7 @@ docker build -t openclaw:local -f Dockerfile .
 docker build -t openclaw:custom -f Dockerfile.local .
 
 # 3. Run setup with the custom image
+export OPENCLAW_DOCKER_APT_PACKAGES=gh
 export OPENCLAW_IMAGE=openclaw:custom
 export OPENCLAW_HOME_VOLUME=openclaw-home
 ./docker-setup.sh
