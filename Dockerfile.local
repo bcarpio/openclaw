@@ -1,0 +1,7 @@
+FROM openclaw:local
+USER root
+RUN curl -fsSL https://go.dev/dl/go1.24.1.linux-amd64.tar.gz | tar -C /usr/local -xz
+RUN mkdir -p /home/node/.npm-global && chown node:node /home/node/.npm-global
+ENV PATH="/usr/local/go/bin:/home/node/go/bin:/home/node/.npm-global/bin:${PATH}"
+USER node
+RUN npm config set prefix /home/node/.npm-global
