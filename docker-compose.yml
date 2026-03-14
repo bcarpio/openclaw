@@ -17,6 +17,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
+      - openclaw-home:/home/node
       - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
       - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
       - ${CLAUDE_CONFIG_DIR:-~/.claude}:/home/node/.claude
@@ -76,6 +77,7 @@ services:
       CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
       TZ: ${OPENCLAW_TZ:-UTC}
     volumes:
+      - openclaw-home:/home/node
       - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
       - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
     stdin_open: true
@@ -86,4 +88,5 @@ services:
       - openclaw-gateway
 
 volumes:
+  openclaw-home:
   linuxbrew:
