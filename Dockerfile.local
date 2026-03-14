@@ -6,6 +6,9 @@ RUN curl -fsSL https://go.dev/dl/go1.24.1.linux-amd64.tar.gz | tar -C /usr/local
 RUN mkdir -p /home/node/.npm-global && chown node:node /home/node/.npm-global
 RUN mkdir -p /home/linuxbrew/.linuxbrew && chown -R node:node /home/linuxbrew
 RUN npm install -g @anthropic-ai/claude-code
+# Extensions import from ../../../src/ via jiti but Docker image only ships dist/.
+# Copy source tree so runtime transpilation resolves correctly.
+COPY --chown=node:node src /app/src
 USER node
 RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 RUN npm config set prefix /home/node/.npm-global
