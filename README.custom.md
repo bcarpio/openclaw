@@ -42,12 +42,28 @@ export OPENCLAW_HOME_VOLUME=openclaw-home
 ./docker-setup.sh
 ```
 
-## LiteLLM configuration
+## Post-setup configuration
 
-If you're running LiteLLM as a proxy (e.g. for AWS Bedrock), update `~/.openclaw/openclaw.json` after setup to point OpenClaw at your LiteLLM instance. Use `host.docker.internal` to reach the host from inside the container:
+After `docker-setup.sh` completes, replace `~/.openclaw/openclaw.json` with a working config. The example below includes LiteLLM proxy configuration (for AWS Bedrock), `allowedOrigins` for the Control UI, and Telegram.
+
+Replace tokens, API keys, and bot tokens with your own values:
 
 ```json
 {
+  "wizard": {
+    "lastRunAt": "2026-03-14T20:18:08.251Z",
+    "lastRunVersion": "2026.3.14",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "auth": {
+    "profiles": {
+      "litellm:default": {
+        "provider": "litellm",
+        "mode": "api_key"
+      }
+    }
+  },
   "models": {
     "mode": "merge",
     "providers": {
@@ -88,11 +104,88 @@ If you're running LiteLLM as a proxy (e.g. for AWS Bedrock), update `~/.openclaw
       },
       "workspace": "/home/node/.openclaw/workspace"
     }
+  },
+  "tools": {
+    "profile": "coding",
+    "web": {
+      "search": {
+        "enabled": true,
+        "provider": "gemini",
+        "gemini": {
+          "apiKey": "<YOUR_GEMINI_API_KEY>"
+        }
+      }
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "boot-md": { "enabled": true },
+        "command-logger": { "enabled": true },
+        "session-memory": { "enabled": true }
+      }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "dmPolicy": "pairing",
+      "botToken": "<YOUR_TELEGRAM_BOT_TOKEN>",
+      "groupPolicy": "allowlist",
+      "streaming": "partial"
+    }
+  },
+  "gateway": {
+    "controlUi": {
+      "allowedOrigins": ["http://localhost:18789", "http://127.0.0.1:18789"]
+    },
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "<YOUR_GATEWAY_TOKEN>"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "contacts.add",
+        "calendar.add",
+        "reminders.add",
+        "sms.send"
+      ]
+    }
+  },
+  "plugins": {
+    "entries": {
+      "telegram": { "enabled": true }
+    }
   }
 }
 ```
 
-Merge this into your existing `~/.openclaw/openclaw.json` — don't replace the whole file, as setup writes gateway tokens and other config there.
+Key things to replace:
+- `<YOUR_GEMINI_API_KEY>` — Gemini API key for web search
+- `<YOUR_TELEGRAM_BOT_TOKEN>` — Telegram bot token from @BotFather
+- `<YOUR_GATEWAY_TOKEN>` — printed by `docker-setup.sh` during setup (also in `.env`)
+
+The `gateway.controlUi.allowedOrigins` must be set manually — `docker-setup.sh` fails to set it due to the gateway crash-loop during onboard.
 
 ## Post-setup skill install
 
