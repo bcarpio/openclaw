@@ -22,6 +22,7 @@ dns:
 
 Extends `openclaw:local` with:
 
+- **Homebrew (Linuxbrew)** so brew-only skills install without manual workarounds
 - **Go 1.24** from the official tarball (Debian apt ships 1.19 which is too old for most Go-based skills)
 - **User-writable npm global prefix** so `npm install -g` works as the non-root `node` user
 
@@ -62,8 +63,7 @@ docker compose run --rm --entrypoint sh openclaw-cli -c "go install github.com/H
 ## Notes
 
 - `OPENCLAW_HOME_VOLUME` persists `/home/node` so installed binaries survive container restarts.
-- Brew-only skills (`gemini`, `gog`, `obsidian`) have no Docker workaround yet — upstream needs to add npm/apt/go fallback install specs.
-- `gh` (GitHub CLI) can be added via `OPENCLAW_DOCKER_APT_PACKAGES` if you add the GitHub apt repo, or installed via their [official Linux instructions](https://github.com/cli/cli/blob/trunk/docs/install_linux.md).
+- Homebrew is included in the image so all skill install methods (brew, npm, go) work out of the box. Adds ~500MB to the image.
 
 ## Upstream issues
 
