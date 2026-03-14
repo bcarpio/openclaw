@@ -81,6 +81,33 @@ Authenticate with your `LITELLM_MASTER_KEY`.
 
 By defaulting to Haiku for Telegram and routine chat, you keep daily costs minimal. Sonnet is available in the OpenClaw web UI when you need it for complex tasks — just switch models in the chat interface.
 
+### Context growth and compaction costs
+
+As a chat session grows, OpenClaw sends more tokens per request — the full conversation history is included with each call. This means input costs grow with every message.
+
+OpenClaw handles this with **compaction** (see upstream docs: `docs/concepts/compaction.md`). When the session approaches the model's context window, it automatically summarizes older messages and keeps only recent turns verbatim. Your config uses `compaction.mode: "safeguard"` which structures summaries with decisions, TODOs, constraints, and identifiers.
+
+**Cost implications:**
+- The compaction summarization itself is an LLM call that costs tokens
+- Before compaction triggers, every message includes the growing history as input
+- Long Telegram conversations can quietly accumulate input costs before compaction kicks in
+- The compaction call counts against your virtual key budget
+
+**Tips:**
+- Start new sessions (`/new`) periodically instead of running one endless conversation
+- Consider setting `compaction.model` to `litellm/claude-haiku` so compaction summaries use the cheap model even if you switched to Sonnet mid-conversation
+- Monitor per-request token counts in the LiteLLM logs to spot cost spikes
+
+### Budget exceeded behavior
+
+When your virtual key's budget is exceeded, LiteLLM returns an error like:
+
+```
+Budget has been exceeded! Current cost: 0.21, Max budget: 0.0
+```
+
+**Important:** The OpenClaw chat interface does not show this error to the user — it just silently fails to respond. Check the LiteLLM logs at `http://localhost:4000/ui` (Logs page) if the bot stops responding.
+
 ### Why this matters
 
 AI agents can generate unbounded API calls — especially with tool loops, retries, and multi-step reasoning. Without spend limits, a single runaway session could burn through hundreds of dollars. LiteLLM is your circuit breaker.
