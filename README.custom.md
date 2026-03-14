@@ -29,17 +29,17 @@ Extends `openclaw:local` with:
 ## Usage
 
 ```bash
-# 1. Build the base image first
-docker build -t openclaw:local -f Dockerfile .
-
-# 2. Build the custom layer on top, tagged as openclaw:local
-# docker-setup.sh only skips pulling when the image is named "openclaw:local"
-docker build -t openclaw:local -f Dockerfile.local .
-
-# 3. Run setup
+# 1. Run setup (builds openclaw:local from Dockerfile and runs onboard)
+#    Skip skill installs during the wizard — they'll fail without brew/go.
 export OPENCLAW_DOCKER_APT_PACKAGES=gh
 export OPENCLAW_HOME_VOLUME=openclaw-home
 ./docker-setup.sh
+
+# 2. Build the custom layer on top, overwriting openclaw:local
+docker build -t openclaw:local -f Dockerfile.local .
+
+# 3. Restart gateway with the custom image
+docker compose up -d --force-recreate openclaw-gateway
 ```
 
 ## Post-setup configuration
